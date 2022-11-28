@@ -1,0 +1,110 @@
+%clear command window, close all figures
+clc 
+clear 
+close all 
+
+% initialize scene  
+myScene = simpleGameEngine('retro_cards.png', 16, 16, 8, [999,999,999]);  
+
+% obtain back and front of card 
+backOfCard = 5; % 5=blue with white border
+frontOfCard(1:10) = 21:30; % 21:30 correspond to sprite sheet indexes; 
+blankCard = 2; %white card on sprite sheet
+
+% create 4x5 board 
+card_display = blankCard * ones(4,5); %board of 4x5 blank cards
+
+% display cards flipped over 
+card_display(:,:) = backOfCard; 
+
+% shuffle the front of the cards using shuffle function 
+shuffledVector = shuffledCards(20); %created "shuffledVector" function to shuffle cards 
+%assign front of cards to corresponding index of shuffled cards; 1= first
+%card, 2= second card etc. 
+for i = 1:length(shuffledVector) 
+    if shuffledVector(i) == 1 
+        shuffledVector(i) = frontOfCard(1); 
+    elseif shuffledVector(i) == 2 
+        shuffledVector(i) = frontOfCard(2); 
+    elseif shuffledVector(i) == 3 
+        shuffledVector(i) = frontOfCard(3); 
+    elseif shuffledVector(i) == 4 
+        shuffledVector(i) = frontOfCard(4); 
+    elseif shuffledVector(i) == 5 
+        shuffledVector(i) = frontOfCard(5); 
+    elseif shuffledVector(i) == 6 
+        shuffledVector(i) = frontOfCard(6); 
+    elseif shuffledVector(i) == 7 
+        shuffledVector(i) = frontOfCard(7); 
+    elseif shuffledVector(i) == 8 
+        shuffledVector(i) = frontOfCard(8); 
+    elseif shuffledVector(i) == 9 
+        shuffledVector(i) = frontOfCard(9); 
+    elseif shuffledVector(i) == 10 
+        shuffledVector(i) = frontOfCard(10); 
+    end 
+end 
+% above creates a 1x20 vector, reshape is used to create a 4x5 matrix
+shuffledVector = reshape(shuffledVector, 4, 5); 
+card_displayFront = shuffledVector; 
+
+% display board with cards 
+drawScene(myScene, card_display); 
+
+% display scores 
+title('Player 1 Score: 0 Player 2 Score: 0'); 
+%instructions for playing game correctly, not breaking it
+xlabel(["Click the card you want to flip over";"Do not click the same card twice in a row";"Do not click a card that has been matched"]);
+
+% initialize variables, resets score
+matchCount = 0; 
+playerTurn = 0; 
+player1Score = 0; 
+player2Score = 0; 
+
+% keep looping until all cards have been matched  
+while (matchCount < 10)  
+    %allow player to click any card
+    [r1,c1] = getMouseInput(myScene); 
+    % flip over the card clicked 
+    card_display(r1,c1) = card_displayFront(r1,c1); 
+    firstCard = card_displayFront(r1,c1); 
+    drawScene(myScene, card_display); 
+    
+    % allow player to click any card 
+    [r2,c2] = getMouseInput(myScene); 
+    % flip over the card clicked 
+    card_display(r2,c2) = card_displayFront(r2,c2); 
+    drawScene(myScene, card_display); 
+    secondCard = card_displayFront(r2,c2); 
+
+    % check if first and second card match 
+    if firstCard == secondCard 
+        matchCount = matchCount + 1; 
+        if rem(playerTurn, 2) ~= 0 %remainder function, divides by 2. no remainder means player 2 turn 
+            player2Score = player2Score + 1; % increase score 
+            title("Player 1 Score: " + player1Score + " Player 2 Score: " + player2Score); % update score
+        else 
+            player1Score = player1Score + 1; % increase score
+            title("Player 1 Score: " + player1Score + " Player 2 Score: " + player2Score); % update score
+        end 
+
+    % if cards do not match, flip them back over and switch to next player 
+    else 
+        card_display(r1,c1) = backOfCard; 
+        card_display(r2,c2) = backOfCard; 
+        pause(1); % delay flipping to show if there is a match or not  
+        drawScene(myScene, card_display); 
+        playerTurn = playerTurn + 1; %switches player
+    end 
+end 
+
+% display match results 
+if player1Score > player2Score 
+    title({"Player 1 Score: " + player1Score + "                Player 2 Score: " + player2Score;"Player 1 wins!"});
+elseif player2Score > player1Score 
+    title({"Player 1 Score: " + player1Score + "                Player 2 Score: " + player2Score;"Player 2 wins!"});
+else 
+    title({"Player 1 Score: " + player1Score + "                Player 2 Score: " + player2Score;"It's a tie!"}); 
+end 
+    xlabel("Exit and click run to play again")
